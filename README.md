@@ -19,19 +19,19 @@ A recurring pattern in this specification. which I generally spell out in longer
 
 ```js
 // this is fine...
+function useRevealedController(url) {
+  return fetch({url, controller: controller => {
+    /* use `controller` however you want here */
+  }});
+}
+
+// and this is fine, too!
 function usePreconstructedController(url) {
   let controller = new FetchController();
 
   /* use `controller` however you want here */
 
   return fetch({url, controller});
-}
-
-// and this is fine, too!
-function useRevealedController(url) {
-  return fetch({url, controller: controller => {
-    /* use `controller` however you want here */
-  }});
 }
 ```
 
