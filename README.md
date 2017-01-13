@@ -15,9 +15,38 @@ For the purposes of this document, "a fetch" refers to all actions entailed with
 
 ## Constructed-or-revealing-constructor options
 
-A recurring pattern in this specification. which I generally spell out in longer terms instead of referring to it by name (as I haven't given it a pithy one), is an option on a call/constructor that may take either a function that works as a revealing constructor (ie. an object is constructed and then passed to the given callback), or an object that has *already* been constructed (ie. by calling its constructor directly).
+A recurring pattern in this specification. which I generally spell out in longer terms instead of referring to it by name (as I haven't given it a pithy one), is an option on a call/constructor that may take either a function that works as a revealing constructor (ie. an object is constructed and then passed to the given callback), or an object that has *already* been constructed (ie. by calling its constructor directly):
 
-This design pattern is in place to address developer sentiments that one flow would be less natural with the way their code is factored over another. Accomodating both of these flows doesn't cause any conflicts in the specification's design, and, indeed, respecting *both* of them, *cooperatively*, allows for better factoring of implementations to *interoperate* according to whichever form factor makes more sense for their implementation. (For example, there are many points in this specification describing behaviors that should be followed when a function call employs *both* approaches *simultaneously*.)
+```js
+// this is fine...
+function usePreconstructedController(url) {
+  let controller = new FetchController();
+
+  /* ... hook up the FetchController however you want here ... */
+
+  return fetch({url, controller});
+}
+
+// and this is fine, too!
+function useRevealedController(url) {
+  return fetch({url, controller: controller => {
+    /* ... hook up the FetchController however you want here ... */
+  }});
+}
+```
+
+This design pattern is in place to address developer sentiments that one flow would be less natural with the way their code is factored over another. Accomodating both of these flows doesn't cause any conflicts in the specification's design, and, indeed, respecting *both* of them, *cooperatively*, allows for better factoring of implementations to *interoperate* according to whichever form factor makes more sense for their implementation. For example, there are many points in this specification describing behaviors that should be followed when a function call employs *both* approaches *simultaneously*, eg. preconstructing a `FetchObserver` and passing it for use with a to-be-revealed `FetchController`:
+
+```js
+// maybe this makes the most sense for your use case!
+function useRevealedController(url) {
+  let observer = new FetchObserver();
+  return fetch({url, observer, controller: controller => {
+    /* use `controller` however you want here -
+       its `controller.observer` is the observer you passed in! */
+  }});
+}
+```
 
 ## Two new classes
 
