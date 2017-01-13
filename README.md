@@ -87,9 +87,9 @@ Read-only property. A boolean introspecting whether the `FetchController` or `Fe
 
 This boolean is mostly only meaningful in the context of a pre-constructed `FetchController` or `FetchObserver` (for determining whether it has been used or not); for `FetchController` or `FetchObserver` objects constructed via revealing constructor or provided with a `FetchEvent`, this will always be `false`.
 
-### FetchObserver.begin, FetchController.begin
+### FetchObserver.start, FetchController.start
 
-Read-only property. A Promise that is resolved when the `FetchController` or `FetchObserver` is associated with a fetch, with the value of the object itself (the `FetchObserver` or `FetchController` that the `begin` Promise is a property of).
+Read-only property. A Promise that is resolved when the `FetchController` or `FetchObserver` is associated with a fetch, with the value of the object itself (the `FetchObserver` or `FetchController` that the `start` Promise is a property of).
 
 This Promise is mostly only meaningful in the context of a pre-constructed `FetchController` or `FetchObserver` (for taking action once it is used); for `FetchController` or `FetchObserver` objects constructed via revealing constructor or provided with a `FetchEvent`, this will always be resolved.
 
