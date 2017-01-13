@@ -129,7 +129,7 @@ Note that, for a `FetchObserver` provided as part of a `FetchEvent` for a Servic
 
 Fired when the fetch's request is initiated. This is analogous to XHR's "loadstart" event.
 
-### `progressup`
+### `upload`
 
 Fired when the fetch sends data in the request. This is analogous to the "progress" event on an XMLHttpRequest's `upload` object.
 
@@ -137,7 +137,7 @@ Fired when the fetch sends data in the request. This is analogous to the "progre
 
 Fired when the fetch receives a response and headers from the server. This is analogous to the "readystatechange" event when an XMLHttpRequest's `readyState` changes to `2` (`HEADERS_RECEIVED`).
 
-### `progressdown`
+### `download`
 
 Fired when the fetch receives data in the response. This is analogous to the "progress" event on an XMLHttpRequest's *base* object.
 
