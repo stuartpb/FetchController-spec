@@ -119,37 +119,43 @@ If the fetch is already complete, this is an error. See [whatwg/fetch#448][].
 
 ## FetchObserver events
 
-(Note that these are all tentative, as I'm not all that familiar with the form factors of prior solutions to these kinds of events. I'm mostly focused on the fetch-control problem, inclusing how FetchController and FetchObserver can be related and provided: the observation concerns are kind of new to me, and I'm more-or-less punting on them in this revision so I can get the framing around construction and all that settled.)
+These are patterned after [the progress events of XMLHttpRequest][Monitoring progress], but with the names changed, to avoid the ironically-overloaded use of the word "load", and to consolidate upload and download events into the same stream (rather than having all but one kind of event mirrored across two objects, with the one differing kind of event having the same name).
+
+[Monitoring progress]: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Monitoring_progress
 
 Note that, for a `FetchObserver` provided as part of a `FetchEvent` for a Service Worker, these events correspond to the point of view of fetch *being handled*: for instance, the `progressdown` events will fire for whatever data the Service Worker provides via `respondWith`, *even if that data is being produced by code within the Service Worker from a non-network source*.
 
-### `begin`
+### `start`
 
-Fired when the fetch's request is initiated.
+Fired when the fetch's request is initiated. This is analogous to XHR's "loadstart" event.
 
-### `bodyup`
+### `progressup`
 
-Fired when the fetch sends data in the request body. Size and type details will be available as properties of the event (TODO).
+Fired when the fetch sends data in the request. This is analogous to the "progress" event on an XMLHttpRequest's `upload` object.
 
 ### `response`
 
-Fired when the fetch first receives a response from the server.
+Fired when the fetch receives a response and headers from the server. This is analogous to the "readystatechange" event when an XMLHttpRequest's `readyState` changes to `2` (`HEADERS_RECEIVED`).
 
-### `bodydown`
+### `progressdown`
 
-Fired when receiving data in the response body. Size and type details will be available as properties of the event (TODO).
+Fired when the fetch receives data in the response. This is analogous to the "progress" event on an XMLHttpRequest's *base* object.
 
 ### `complete`
 
-Fires when the fetch completes successfully.
+Fires when the fetch completes successfully. This is analogous to XHR's "load" event.
 
 ### `abort`
 
-Fires if the fetch is aborted, either by a `FetchController` or by the user agent. (More data about the source of the abort will probably be available on the event.)
+Fires if the fetch is aborted, either by a `FetchController` or by the user agent. (More data about the source of the abort will probably be available on the event.) This is analogous to XHR's "abort" event.
+
+### `error`
+
+Fires if the fetch fails, for whatever non-abortive reason (such as if the connection is unexpectedly terminated). This is analogous to XHR's "error" event.
 
 ### `end`
 
-Fires after `complete` or `abort`.
+Fires after `complete`, `abort`, or `error`. This is analogous to XHR's "loadend" event.
 
 ## Restrictions
 
