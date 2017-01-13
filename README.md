@@ -116,17 +116,20 @@ Read-only property. A boolean introspecting whether the `FetchController` or `Fe
 
 This boolean is mostly only meaningful in the context of a pre-constructed `FetchController` or `FetchObserver` (for determining whether it has been used or not); for `FetchController` or `FetchObserver` objects constructed via revealing constructor or provided with a `FetchEvent`, this will always be `false`.
 
-### FetchObserver.start, FetchController.start
+### FetchObserver.finished
 
-Read-only property. A Promise that is resolved when the `FetchController` or `FetchObserver` is associated with a fetch, with the value of the object itself (the `FetchObserver` or `FetchController` that the `start` Promise is a property of).
+Read-only property describing whether, and how, the fetch associated with this `FetchObserver` terminated:
 
-This Promise is mostly only meaningful in the context of a pre-constructed `FetchController` or `FetchObserver` (for taking action once it is used); for `FetchController` or `FetchObserver` objects constructed via revealing constructor or provided with a `FetchEvent`, this will always be resolved.
+- If the fetch has not finished (is still waiting, or if the `FetchObserver` has not been associated with a Fetch yet), this is `false`.
+- If the fetch has completed successfully, this is `"complete"`.
+- If the fetch was aborted, this is `"abort"`.
+- If the fetch ended in an error, this is `"error"`.
 
-### FetchObserver.request, FetchController.request
+### FetchObserver.request
 
-Read-only property. The `Request` that instantiated the fetch that this `FetchObserver` observes and/or `FetchController` controls.
+Read-only property. The `Request` that instantiated the fetch that this `FetchObserver` observes.
 
-`FetchObserver.request` is admittedly redundant with the `request` property of whatever the `FetchObserver`'s parent may be (ie. a `FetchController` or `FetchEvent`): however, it's a sensible property to allow code that *only takes `FetchObserver` arguments* to operate normally.
+When the `FetchObserver` is a property of a `FetchEvent` alongside `FetchEvent.request`, `FetchObserver.request` is admittedly redundant: however, it's a sensible property to allow code that *only takes `FetchObserver` arguments* to operate normally, as well as making the request readable to `FetchController` objects.
 
 ### FetchController.fetch(options)
 
