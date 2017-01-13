@@ -56,7 +56,7 @@ This proposal adds two new classes, `FetchController` and `FetchObserver`.
 
 The `FetchObserver` class provides passive properties and methods to *observe the state* of a fetch, from its instantiation, through any upload and download traffic, up until the fetch's completion.
 
-`FetchObserver` features an `addEventListener` method to listen to events from a fetch, such as `progressup`: it also features read-only Promise properties, such as `complete`, that resolve when the corresponding one-time event has fired (or reject in situations where it never will, such as when the fetch is aborted).
+`FetchObserver` features an `addEventListener` method to listen to events from a fetch, such as `upload` and `download` (for respective progress events), `response` (for when response headers have been received), and `end` (for when the fetch has ended).
 
 ### `FetchController`
 
