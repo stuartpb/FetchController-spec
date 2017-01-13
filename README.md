@@ -60,7 +60,7 @@ The `FetchObserver` class provides passive properties and methods to *observe th
 
 ### `FetchController`
 
-`FetchController` features methods to control a fetch, such as `abort()` to abort the fetch (rejecting any related promises pending from it). It also includes a read-only `.observer` property, containing an associated `FetchObserver` for monitoring the fetch (which may be constructed before the `FetchController` and associated on the `FetchController` object's construction, as described below).
+`FetchController` features methods to control a fetch, such as `abort()` to abort the fetch (rejecting any related promises pending from it). It also includes an `.observer` property, containing an associated `FetchObserver` for monitoring the fetch (which may be constructed before the `FetchController` and associated on the `FetchController` object's construction, as described below).
 
 ## `FetchEvent.observer`
 
@@ -76,14 +76,18 @@ To be clear, these are the internal steps `fetch()` follows:
 - If there is a value defined for the `observer` option:
   - If the `observer` option is a pre-constructed `FetchObserver` object:
     - If the `controller` option is a pre-constructed `FetchController` object, and the `.observer` property of that controller is not the `FetchObserver` defined by the `observer` option, throw a TypeError.
+    - Else, if the pre-constructed `FetchObserver` is already associated with a fetch (`.pending` is `false`), throw a TypeError.
     - Else, let "the observer" be that `FetchObserver`.
   - Else, if the `observer` option is a function, let "the observer" be a newly-constructed `FetchObserver`.
   - Else, throw a TypeError.
 - If there is a value defined for the `controller` option:
-  - If the `controller` option is a pre-constructed `FetchController` object, let "the controller" be that `FetchController`.
-  - Else, if the `controller` option is a function, let "the controller" be a newly-constructed `FetchController`:
-    - If "the observer" has already been defined, then let the observer "the controller" is associated with on construction be "the observer".
-    - Else, let "the observer" be the implicitly-constructed observer constructed with "the controller".
+  - If the `controller` option is a pre-constructed `FetchController` object:
+    - If the pre-constructed `FetchController` is already associated with a fetch (`.pending` is `false`), throw a TypeError.
+    - Else, if the pre-constructed `FetchController` has a constructed `FetchObserver` as its `.observer` that is already associated with a fetch (`.pending` is `false`), throw a TypeError.
+    - Else, let "the controller" be that `FetchController`.
+  - Else, if the `controller` option is a function:
+    - If "the observer" has already been defined, then let "the controller" be a newly-constructed `FetchController` with "the observer" as its initial `.observer` property.
+    - Else, let "the controller" be a newly-constructed `FetchController`, let "the observer" be an implicitly-constructed observer constructed with "the controller" as its initial `.observer` property.
   - Else, throw a TypeError.
 - Associate "the controller" and "the observer", if either are present, with "the fetch".
 - If there is a function present as the `observer` option, call it with "the observer" as its argument.
@@ -106,15 +110,27 @@ The `options` object is only reserved for the purposes of future extension. This
 
 Constructs a new `FetchController`, for use with a fetch at some point after construction.
 
-The only `options` property specified at this time is `observer`, which may take either a pre-constructed `FetchObserver` and associate it with the new `FetchController` as its `.observer` property, or a revealing-constructor function that will receive the newly-constructed `FetchObserver` associated with the `FetchController` as its `.observer` property.
+The only `options` property specified at this time is `observer`, which may take either a pre-constructed `FetchObserver` and associate it with the new `FetchController` as its `.observer` property, or a revealing-constructor function that will receive the newly-constructed `FetchObserver` associated with the `FetchController` as its `.observer` property. (A new `FetchObserver` will be constructed for any constructed `FetchController`, except when an existing one is passed in.)
+
+If a FetchObserver that has already been associated with a fetch (`.pending` is `false`) is passed to this constructor, this will throw a TypeError.
 
 ## Properties and methods
+
+### FetchController.observer
+
+A `FetchObserver` for the fetch controlled by this `FetchController`.
+
+Once the `FetchController` is associated with a fetch, this property is effectively read-only: any attempt to assign a different value to it (other than the `FetchObserver` associated with the same fetch it already has) will result in a TypeError.
+
+While this property may be written to (so long as the `FetchController` has not been associated with a fetch), if the value being set is anything other than a `FetchObserver` with a `.pending` value of true (one that has yet to be associated with a fetch), the assignment will throw a TypeError. (Also, as the value is always initialized to a `FetchObserver` on construction, there should never be a need to set this.)
 
 ### FetchObserver.pending, FetchController.pending
 
 Read-only property. A boolean introspecting whether the `FetchController` or `FetchObserver` is associated with a fetch (`false` if associated, `true` if not).
 
 This boolean is mostly only meaningful in the context of a pre-constructed `FetchController` or `FetchObserver` (for determining whether it has been used or not); for `FetchController` or `FetchObserver` objects constructed via revealing constructor or provided with a `FetchEvent`, this will always be `false`.
+
+As corresponding one-time Promise properties are on the table, design-wise, for these objects, neither a `FetchController` nor a `FetchObserver` may be reused for multiple fetches, nor may a `FetchController` or `FetchObserver` have their associated fetch changed (or vice versa) after the fetch's instantiation. As such, this property helps end developers determine whether or not a `FetchController` or `FetchObserver` is safe to use with a new fetch.
 
 ### FetchObserver.finished
 
@@ -137,7 +153,9 @@ Per [this comment](https://github.com/whatwg/fetch/issues/447#issuecomment-27073
 
 If a `FetchController` has been constructed and is pending (see `FetchController.pending` above), this performs a `fetch()` with all the given `options` as `window.fetch()` would, using the `FetchController` as the fetch's controller.
 
-If a function is specified for the `controller` or `observer` options (ie. "revealing constructors"), they are passed the already-constructed `FetchController` or corresponding `.observer`, respectively. If any other value is defined for either these options, the fetch fails with a `TypeError`.
+If a function is specified for the `controller` or `observer` options (ie. "revealing constructors"), they are passed the already-constructed `FetchController` or corresponding `.observer`, respectively. If any other value is defined for either these options, the fetch fails with a `TypeError` (other than the `FetchObserver` that is already the `.observer` property of the `FetchObserver`), per the `fetch()` steps described above.
+
+If the `FetchController` has already been associated with a fetch (`.pending is false`), this throws a TypeError.
 
 Note that, although such a method *could* be specified, this document *does not* specify a corresponding `FetchObserver.fetch()` method, as methods on `FetchObserver` are meant to be uniformly *passive*.
 
@@ -188,7 +206,3 @@ Fires if the fetch fails, for whatever non-abortive reason (such as if the conne
 ### `end`
 
 Fires after `complete`, `abort`, or `error`. This is analogous to XHR's "loadend" event.
-
-## Restrictions
-
-As corresponding one-time Promise properties are on the table, design-wise, for these objects, neither a `FetchController` nor a `FetchObserver` may be reused for multiple fetches, nor may a `FetchController` or `FetchObserver` have their associated fetch changed (or vice versa) after the fetch's instantiation.
