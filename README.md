@@ -191,6 +191,4 @@ Fires after `complete`, `abort`, or `error`. This is analogous to XHR's "loadend
 
 ## Restrictions
 
-Due to the corresponding one-time Promise properties on these objects, neither a `FetchController` nor a `FetchObserver` may be reused for multiple fetches, nor may a `FetchController` or `FetchObserver` have their associated fetch changed (or vice versa) after the fetch's instantiation.
-
-(Likewise, the `FetchObserver` associated with a `FetchController`, as its read-only `.observer` property, many not be modified, before *or* after the instantiation of a corresponding fetch.)
+As corresponding one-time Promise properties are on the table, design-wise, for these objects, neither a `FetchController` nor a `FetchObserver` may be reused for multiple fetches, nor may a `FetchController` or `FetchObserver` have their associated fetch changed (or vice versa) after the fetch's instantiation.
