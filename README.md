@@ -22,7 +22,7 @@ A recurring pattern in this specification. which I generally spell out in longer
 function usePreconstructedController(url) {
   let controller = new FetchController();
 
-  /* ... hook up the FetchController however you want here ... */
+  /* use `controller` however you want here */
 
   return fetch({url, controller});
 }
@@ -30,7 +30,7 @@ function usePreconstructedController(url) {
 // and this is fine, too!
 function useRevealedController(url) {
   return fetch({url, controller: controller => {
-    /* ... hook up the FetchController however you want here ... */
+    /* use `controller` however you want here */
   }});
 }
 ```
@@ -39,7 +39,7 @@ This design pattern is in place to address developer sentiments that one flow wo
 
 ```js
 // maybe this makes the most sense for your use case!
-function useRevealedController(url) {
+function useRevealedControllerWithPreconstructedObserver(url) {
   let observer = new FetchObserver();
   return fetch({url, observer, controller: controller => {
     /* use `controller` however you want here -
